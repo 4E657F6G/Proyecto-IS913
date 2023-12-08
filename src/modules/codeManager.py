@@ -4,9 +4,9 @@ class CodeManager:
     def __init__(self, path_file):
         self.path_file = path_file
         self.python_code = self._read_python_file()
-        cpp_code = '''#include "iostream"
-#include "string"
-#include "stdlib.h"
+        cpp_code = '''#include <iostream>
+#include <string>
+#include <stdlib.h>
 
 using namespace std;
 

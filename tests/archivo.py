@@ -5,10 +5,10 @@ b = 1.3
 t = "fg"
 
 if a > b:
-    c = a + b
+    a = 5
 
 
 while(a>b):
     n = 7
-    a += 1
+    a = 1
         
