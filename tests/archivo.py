@@ -1,13 +1,14 @@
-
 print("hola")
+
 a = 2
-b = 1
-print("suma:", a+b)
+b = 1.3
+t = "fg"
+
 if a > b:
-    print("a es mayor que b")
-else:
-    print("b es mayor que a")
+    c = a + b
+
+
 while(a>b):
-    print("true")
+    n = 7
     a += 1
         

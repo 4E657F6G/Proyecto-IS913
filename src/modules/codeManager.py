@@ -4,8 +4,14 @@ class CodeManager:
     def __init__(self, path_file):
         self.path_file = path_file
         self.python_code = self._read_python_file()
-        cpp_code = self.translate_to_cpp()
-        print(cpp_code)
+        cpp_code = '''#include "iostream"
+#include "string"
+#include "stdlib.h"
+
+using namespace std;
+
+        '''
+        cpp_code += self.translate_to_cpp()
         self._create_cpp_file(cpp_code)
 
     def _create_cpp_file(self, cpp_code):
@@ -25,7 +31,17 @@ class CodeManager:
             return cpp_code
         except SyntaxError as e:
             return f"Error de sintaxis en el archivo Python: {str(e)}"
-
+        
+    def _target_type(self, target_type):
+        if 'int' in target_type:
+            return 'int'
+        elif 'str' in target_type:
+            return 'string'
+        elif 'float' in target_type:
+            return 'double'
+        elif 'bool' in target_type:
+            return 'bool'
+        
     def _translate_node(self, node):
         if isinstance(node, ast.Module):
             cpp_code = ''
@@ -38,13 +54,15 @@ class CodeManager:
             return f'while ({condition}) {{\n{body}\n}}\n'
         elif isinstance(node, ast.If):
             condition = self._translate_node(node.test)
+            print("node.body:", node.body)
             body = self._translate_node(node.body)
             else_body = self._translate_node(node.orelse) if node.orelse else ''
             return f'if ({condition}) {{\n{body}\n}} else {{\n{else_body}\n}}\n'
         elif isinstance(node, ast.Assign):
             targets = ', '.join(target.id for target in node.targets)
             value = self._translate_node(node.value)
-            return f'{targets} = {value};\n'
+            target_type = self._target_type(str(type(value)))
+            return f'{target_type} {targets} = {value};\n'
         elif isinstance(node, ast.Expr):
             return self._translate_node(node.value)
         elif isinstance(node, ast.Call):
