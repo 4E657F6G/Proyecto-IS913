@@ -4,14 +4,17 @@ class CodeManager:
     def __init__(self, path_file):
         self.path_file = path_file
         self.python_code = self._read_python_file()
-        cpp_code = '''#include <iostream>
-#include <string>
-#include <stdlib.h>
+        cpp_code = '''
+#include <iostream>
+#include "string"
 
 using namespace std;
 
-        '''
+int main() {
+
+'''
         cpp_code += self.translate_to_cpp()
+        cpp_code += 'return 0;\n}'
         self._create_cpp_file(cpp_code)
 
     def _create_cpp_file(self, cpp_code):
@@ -50,25 +53,28 @@ using namespace std;
             return cpp_code
         elif isinstance(node, ast.While):
             condition = self._translate_node(node.test)
-            body = self._translate_node(node.body)
-            return f'while ({condition}) {{\n{body}\n}}\n'
+            body_list = [self._translate_node(stmt) for stmt in node.body]
+            body = " ".join(body_list)
+            return f'    while ({condition}) {{\n{body}\n}}\n'
         elif isinstance(node, ast.If):
             condition = self._translate_node(node.test)
-            print("node.body:", node.body)
-            body = self._translate_node(node.body)
-            else_body = self._translate_node(node.orelse) if node.orelse else ''
-            return f'if ({condition}) {{\n{body}\n}} else {{\n{else_body}\n}}\n'
+            body_list = [self._translate_node(stmt) for stmt in node.body]
+            body = " ".join(body_list)
+            else_body_list = [self._translate_node(stmt) for stmt in node.orelse] if node.orelse else ''
+            else_body = " ".join(else_body_list)
+            print(type(node.orelse))
+            return f'    if ({condition}) {{\n{body}\n}} else {{\n{else_body}\n}}\n' if else_body != '' else f'    if ({condition}) {{\n{body}\n}}\n'
         elif isinstance(node, ast.Assign):
             targets = ', '.join(target.id for target in node.targets)
             value = self._translate_node(node.value)
             target_type = self._target_type(str(type(value)))
-            return f'{target_type} {targets} = {value};\n'
+            return f'    {target_type} {targets} = {value};\n'
         elif isinstance(node, ast.Expr):
             return self._translate_node(node.value)
         elif isinstance(node, ast.Call):
             if isinstance(node.func, ast.Name) and node.func.id == 'print':
                 args = ', '.join(self._translate_node(arg) for arg in node.args)
-                return f'std::cout << {args} << std::endl;\n'
+                return f'    cout << {args} << endl;\n'
         elif isinstance(node, ast.Str):
             return f'"{node.s}"'
         elif isinstance(node, ast.BinOp):
@@ -106,4 +112,4 @@ using namespace std;
         elif isinstance(node, ast.Num):
             return node.n
         else:
-            return 'Error'
+            return '     Error'
